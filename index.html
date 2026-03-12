@@ -1,1 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sapo Atravessando a Rua</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #d0f0c0;
+}
+h1 {
+    margin-bottom: 20px;
+}
+#game-area {
+    width: 400px;
+    height: 500px;
+    margin: 0 auto;
+    background-color: #87CEFA;
+    position: relative;
+    border: 2px solid #000;
+    overflow: hidden;
+}
 
+/* Sapo */
+#frog {
+    width: 40px;
+    height: 40px;
+    background-color: green;
+    position: absolute;
+    bottom: 0;
+    left: 180px;
+    border-radius: 50%;
+}
+
+/* Carros */
+.car {
+    width: 60px;
+    height: 40px;
+    background-color: red;
+    position: absolute;
+    top: 0;
+}
+#status {
+    font-weight: bold;
+    margin-top: 10px;
+}
+</style>
+</head>
+<body>
+<h1>Sapo Atravessando a Rua</h1>
+<div id="game-area">
+    <div id="frog"></div>
+</div>
+<p id="status"></p>
+
+<script>
+const frog = document.getElementById('frog');
+const gameArea = document.getElementById('game-area');
+const status = document.getElementById('status');
+
+let frogX = 180;
+let frogY = 460;
+
+let cars = [];
+let carSpeed = 2;
+let gameInterval;
+
+// Criar carros
+function createCars() {
+    for (let i = 0; i < 5; i++) {
+        const car = document.createElement('div');
+        car.classList.add('car');
+        car.style.top = `${80 + i * 80}px`;
+        car.style.left = `${Math.random() * 400}px`;
+        gameArea.appendChild(car);
+        cars.push(car);
+    }
+}
+
+// Mover sapo
+document.addEventListener('keydown', (e) => {
+    const step = 20;
+    if (e.key === 'ArrowUp' && frogY - step >= 0) frogY -= step;
+    if (e.key === 'ArrowDown' && frogY + step <= 460) frogY += step;
+    if (e.key === 'ArrowLeft' && frogX - step >= 0) frogX -= step;
+    if (e.key === 'ArrowRight' && frogX + step <= 360) frogX += step;
+    frog.style.left = `${frogX}px`;
+    frog.style.top = `${frogY}px`;
+
+    checkWin();
+});
+
+// Mover carros
+function moveCars() {
+    cars.forEach(car => {
+        let x = parseFloat(car.style.left);
+        x += carSpeed;
+        if (x > 400) x = -60; // reaparece do outro lado
+        car.style.left = `${x}px`;
+    });
+}
+
+// Checar colisão
+function checkCollision() {
+    for (let car of cars) {
+        let carX = parseFloat(car.style.left);
+        let carY = parseFloat(car.style.top);
+
+        if (frogX < carX + 60 &&
+            frogX + 40 > carX &&
+            frogY < carY + 40 &&
+            frogY + 40 > carY) {
+            endGame("Você foi atropelado!");
+        }
+    }
+}
+
+// Checar vitória
+function checkWin() {
+    if (frogY <= 0) {
+        endGame("Parabéns! Você atravessou a rua!");
+    }
+}
+
+// Finalizar jogo
+function endGame(message) {
+    status.textContent = message;
+    clearInterval(gameInterval);
+}
+
+// Loop do jogo
+function gameLoop() {
+    moveCars();
+    checkCollision();
+}
+
+// Inicializar
+createCars();
+gameInterval = setInterval(gameLoop, 20);
+</script>
+</body>
+</html>
